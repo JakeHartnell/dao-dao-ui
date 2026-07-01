@@ -19,21 +19,12 @@ import {
 } from '@dao-dao/utils'
 
 import { type MintCw721RoleData } from './index'
+import { validateAgentTokenId, validateRoleSlug } from './validation'
 
 const validatePositiveInteger = (value: string | number) =>
   Number.isSafeInteger(Number(value)) && Number(value) > 0
     ? true
     : 'Must be a positive safe integer.'
-
-const validateRoleSlug = (value?: string | null) =>
-  !value || /^[a-z][a-z0-9-]{1,31}$/.test(value)
-    ? true
-    : 'Role must be a lowercase slug, 2-32 characters, starting with a letter.'
-
-const validateTokenId = (value?: string | null) =>
-  value && !/\s/.test(value)
-    ? true
-    : 'Token ID is required and cannot contain spaces.'
 
 const validateOptionalTokenUri = (value?: string | null) =>
   validateUrlWithIpfs(value || undefined)
@@ -85,7 +76,7 @@ export const MintCw721RoleComponent: ActionComponent<
               (fieldNamePrefix + 'mintMsg.token_id') as 'mintMsg.token_id'
             }
             register={register}
-            validation={[validateRequired, validateTokenId]}
+            validation={[validateRequired, validateAgentTokenId]}
           />
           <InputErrorMessage error={errors?.mintMsg?.token_id} />
         </div>

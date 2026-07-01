@@ -15,6 +15,7 @@ import {
 } from '@dao-dao/utils'
 
 import { MintCw721RoleComponent } from './Component'
+import { AGENT_TOKEN_ID_REGEX, ROLE_SLUG_REGEX } from './validation'
 
 export type MintCw721RoleData = {
   chainId: string
@@ -114,6 +115,18 @@ export class MintCw721RoleAction extends ActionBase<MintCw721RoleData> {
       throw new Error('Weight must be a positive safe integer.')
     }
 
+    if (!AGENT_TOKEN_ID_REGEX.test(token_id)) {
+      throw new Error(
+        'Token ID must match agent:<lowercase-slug>, with a 2-32 character handle starting with a letter.'
+      )
+    }
+
+    if (role && !ROLE_SLUG_REGEX.test(role)) {
+      throw new Error(
+        'Role must be a lowercase slug, 2-32 characters, starting with a letter.'
+      )
+    }
+
     const msg = {
       mint: {
         owner,
@@ -167,7 +180,11 @@ export class MintCw721RoleAction extends ActionBase<MintCw721RoleData> {
     return (
       extensionKeys.every((key) => key === 'role' || key === 'weight') &&
       Number.isSafeInteger(Number(extension.weight)) &&
-      Number(extension.weight) > 0
+      Number(extension.weight) > 0 &&
+      AGENT_TOKEN_ID_REGEX.test(
+        decodedMessage.wasm.execute.msg.mint.token_id
+      ) &&
+      (!extension.role || ROLE_SLUG_REGEX.test(extension.role))
     )
   }
 
